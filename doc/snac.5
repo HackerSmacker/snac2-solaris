@@ -1,0 +1,221 @@
+.Dd $Mdocdate$
+.Dt SNAC 5
+.Os
+.Sh NAME
+.Nm snac
+.Nd message formatting and file format documentation
+.Sh DESCRIPTION
+The
+.Nm
+daemon processes messages from other servers in the Fediverse
+using the ActivityPub protocol.
+.Pp
+This manual describes the allowed formatting of note messages
+and the disk storage layout of
+.Nm
+server and user data. For the operation manual, see
+.Xr snac 1 .
+For the administration manual, see
+.Xr snac 8 .
+.Ss Message Formatting
+Message notes respect the entered new line breaks rigurously.
+A special subset of Markdown is allowed, including:
+.Bl -tag -width tenletters
+.It bold
+**text between two pairs of asterisks**
+.It italic
+*text between a pair of asterisks*
+.It strikethrough text
+~~text between a pair of tildes~~
+.It code
+Text `between backticks` is formatted as code.
+.Bd -literal
+```
+/* text between lines with only three backticks is preformatted */
+int main(int argc, char *argv[])
+{
+    return 0;
+}
+
+```
+.Ed
+.It links
+Standalone URLs are converted to links. Also, from version 2.54,
+markdown-style links in the form of [link label](url) are also
+supported.
+.It attached images
+Standalone URLs for which the final extension is recognized as an
+image (.jpg, .gif, .png, etc), are converted to ActivityPub image
+attachments. Also, from version 2.57, markdown-style image links
+in the form of ![alt text](image url) are also supported.
+.It line separators
+Horizonal rules can be inserted by typing three minus symbols
+alone in a line.
+.It quoted text
+Lines starting with >.
+.It user mentions
+Strings in the format @user@host are requested using the Webfinger
+protocol and converted to links and mentions if something reasonable
+is found.
+.It emoticons /emojis / smileys / silly symbols
+(Note: from version 2.51, these symbols are configurable by the
+instance administrator, so the available ones may differ).
+.Pp
+The following traditional ASCII emoticons or special strings are
+converted to related emojis:
+.Bd -literal
+:-) :-D X-D ;-) B-) :-( :-* <3 :-/ 8-o
+%-) :_( :-| >:-( :facepalm: :shrug: :shrug2:
+:eyeroll: :beer: :beers: :munch: :thumb:
+.Ed
+.El
+.Pp
+.Ss Accepted HTML
+All HTML tags in entries are neutered except the following ones:
+.Bd -literal
+a p br blockquote ul ol li cite small
+span i b u s pre code em strong hr img del
+.Ed
+.Pp
+.Ss Disk Layout
+This section documents version 2.7 of the disk storage layout.
+.Pp
+The base directory contains the following files and folders:
+.Bl -tag -width tenletters
+.It Pa server.json
+Server configuration.
+.It Pa user/
+Directory holding user subdirectories.
+.It Pa object/
+Directory holding the ActivityPub objects. Filenames are hashes of each
+message Id, stored in subdirectories starting with the first two letters
+of the hash.
+.It Pa queue/
+This directory contains the global queue of input/output messages as JSON files.
+File names contain timestamps that indicate when the message will
+be sent. Messages not accepted by their respective servers will be re-enqueued
+for later retransmission until a maximum number of retries is reached,
+then discarded.
+.It Pa inbox/
+Directory storing collected inbox URLs from other instances.
+.It Pa archive/
+If this directory exists, all input and output messages are logged inside it,
+including HTTP headers. Only useful for debugging. May grow to enormous sizes.
+.It Pa error/
+If this directory exists, HTTP signature check error headers are logged here.
+Only useful for debugging.
+.It Pa log/
+If this directory exists, log messages are also stored there in daily files.
+.It Pa app/
+This directory stores Mastodon API apps.
+.It Pa token/
+This directory stores Mastodon API tokens.
+.It Pa style.css
+The server-wide CSS. The content of this file is inserted into the HTML output
+unless a user-specific one exist in the user's
+.Pa static/
+folder.
+.It Pa greeting.html
+This file is served when the server base URL is requested from a web browser. See
+.Xr snac 8
+for more information about the customization options.
+.It Pa public.idx
+This file contains the list of public posts from all users in the server.
+.It Pa filter_reject.txt
+This (optional) file contains a list of regular expressions, one per line, to be
+applied to the content of all incoming posts; if any of them match, the post is
+rejected. This brings the flexibility and destruction power of regular expressions
+to your Fediverse experience. To be used wisely (see
+.Xr snac 8
+for more information).
+.It Pa announcement.txt
+If this file is present, an announcement will be shown to logged in users
+on every page with its contents. It is also available through the Mastodon API.
+Users can dismiss the announcement, which works by storing the modification time
+in the "last_announcement" field of the
+.Pa user.json
+file. When the file is modified, the announcement will then reappear. It can
+contain only text and will be ignored if it has more than 2048 bytes.
+.El
+.Pp
+Each user directory is a subdirectory of 
+.Pa BASEDIR/user/ ,
+has the user id as name and contains the following subdirectories and files:
+.Bl -tag -width tenletters
+.It Pa user.json
+User configuration file.
+.It Pa user_o.json
+User configuration override file. This file is intended for administrators to
+override some user preferences. For current version, the fields that can be
+overridden are 'purge_days' and 'email'.
+.It Pa key.json
+Secret/public key PEM data.
+.It Pa followers.idx
+This file contains the list of followers as a list of hashed object identifiers.
+.It Pa followers/
+This directory stores hard links to the actor objects in the object storage.
+.It Pa following/
+This directory stores the users being followed as hard links to the 'Follow'
+or 'Accept' objects in the object storage. File names are the hashes of each
+actor Id.
+.It Pa private/
+This directory stores hard links to the timeline entries in the object storage.
+.It Pa private.idx
+This file contains the list of timeline entries as a list of hashed
+object identifiers.
+.It Pa public/
+This directory stores hard links to the public timeline entries in the object
+storage.
+.It Pa public.idx
+This file contains the list of public timeline entries as a list of hashed
+object identifiers.
+.It Pa pinned/
+This directory stores hard links to pinned posts.
+.It Pa pinned.idx
+This file contains the list of pinned posts as a list of hashed
+object identifiers.
+.It Pa bookmark/
+This directory stores hard links to bookmarked posts.
+.It Pa bookmark.idx
+This file contains the list of pinned posts as a list of hashed
+object identifiers.
+.It Pa draft/
+This directory stores post drafts.
+.It Pa draft.idx
+This file contains the list of drafts as a list of hashed
+object identifiers.
+.It Pa muted/
+This directory contains files which names are hashes of muted actors. The
+content is a line containing the actor URL.
+Messages from these actors will be ignored on input and not shown in any timeline.
+.It Pa hidden/
+This directory contains references to the hidden timeline entries.
+.It Pa limited/
+This directory contains references to the actor URLs for limited users (those
+being followed but with their boosts blocked).
+.It Pa queue/
+This directory contains the output queue of messages generated by the user as
+JSON files. File names contain timestamps that indicate when the message will
+be sent. Messages not accepted by their respective servers will be re-enqueued
+for later retransmission until a maximum number of retries is reached,
+then discarded.
+.It Pa static/
+Files in this directory are served as-is when requested from the
+.Pa https://HOST/USER/s/...
+URL path. A special file named
+.Pa style.css
+can contain user-specific CSS code to be inserted into the HTML of the
+web interface.
+.It Pa history/
+This directory contains generated HTML files. They may be snapshots of the
+local timeline in previous months or other cached data.
+.It Pa server.pid
+This file stores the server PID in a single text line.
+.El
+.Sh SEE ALSO
+.Xr snac 1 ,
+.Xr snac 8
+.Sh AUTHORS
+.An grunfink Lk https://comam.es/snac/grunfink @grunfink@comam.es
+.Sh LICENSE
+See the LICENSE file for details.

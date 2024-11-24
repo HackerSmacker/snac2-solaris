@@ -1,0 +1,36 @@
+body { max-width: 48em; margin: auto; line-height: 1.5; padding: 0.8em; word-wrap: break-word; }
+pre { overflow-x: scroll; }
+.snac-embedded-video, img { max-width: 100% }
+.snac-origin { font-size: 85% }
+.snac-score { float: right; font-size: 85% }
+.snac-top-user { text-align: center; padding-bottom: 2em }
+.snac-top-user-name { font-size: 200% }
+.snac-top-user-id { font-size: 150% }
+.snac-announcement { border: black 1px solid; padding: 0.5em }
+.snac-avatar { float: left; height: 2.5em; width: 2.5em; padding: 0.25em }
+.snac-author { font-size: 90%; text-decoration: none }
+.snac-author-tag { font-size: 80% }
+.snac-pubdate { color: #a0a0a0; font-size: 90% }
+.snac-top-controls { padding-bottom: 1.5em }
+.snac-post { border-top: 1px solid #a0a0a0; padding-top: 0.5em; padding-bottom: 0.5em; }
+.snac-children { padding-left: 1em; border-left: 1px solid #a0a0a0; }
+.snac-textarea { font-family: inherit; width: 100% }
+.snac-history { border: 1px solid #606060; border-radius: 3px; margin: 2.5em 0; padding: 0 2em }
+.snac-btn-mute { float: right; margin-left: 0.5em }
+.snac-btn-unmute { float: right; margin-left: 0.5em }
+.snac-btn-follow { float: right; margin-left: 0.5em }
+.snac-btn-unfollow { float: right; margin-left: 0.5em }
+.snac-btn-hide { float: right; margin-left: 0.5em }
+.snac-btn-delete { float: right; margin-left: 0.5em }
+.snac-btn-limit { float: right; margin-left: 0.5em }
+.snac-btn-unlimit { float: right; margin-left: 0.5em }
+.snac-footer { margin-top: 2em; font-size: 75% }
+.snac-poll-result { margin-left: auto; margin-right: auto; }
+.snac-list-of-lists { padding-left: 0; }
+.snac-list-of-lists li { display: inline; border: 1px solid #a0a0a0; border-radius: 25px;
+  margin-right: 0.5em; padding-left: 0.5em; padding-right: 0.5em; }
+@media (prefers-color-scheme: dark) { 
+  body, input, textarea { background-color: #000; color: #fff; }
+  a { color: #7799dd }
+  a:visited { color: #aa99dd }
+}

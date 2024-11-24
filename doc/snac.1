@@ -1,0 +1,352 @@
+.Dd $Mdocdate$
+.Dt SNAC 1
+.Os
+.Sh NAME
+.Nm snac
+.Nd A simple, minimalistic ActivityPub instance
+.Sh SYNOPSIS
+.Nm
+.Cm command
+.Ar basedir
+.Op Ar option ...
+.Sh DESCRIPTION
+The
+.Nm
+daemon processes messages from other servers in the Fediverse
+using the ActivityPub protocol.
+.Pp
+This is the user manual and expects an already running
+.Nm
+installation. For the administration manual, see
+.Xr snac 8 .
+For file and data formats, see
+.Xr snac 5 .
+.Ss Web Interface
+The web interface provided by
+.Nm
+is split in two data streams: the public timeline and the
+private timeline. There are no other feeds like the server-scoped
+or the federated firehoses provided by other similar ActivityPub
+implementations like Mastodon or Pleroma.
+.Pp
+The public timeline, also called the local timeline, is what an
+external visitor sees about the activity of a
+.Nm
+user: that is, only the list of public notes, boosts and likes
+the user generates or participates into. This is, obviously,
+read-only, and not very remarkable, unless the user publishes
+messages of staggering genious. A set of history links, grouped
+by month, will also be available at the bottom of the page.
+.Pp
+The private timeline, or simply the timeline, is the private,
+password-protected area of a
+.Nm
+server where the user really interacts with the rest of the
+Fediverse.
+.Pp
+The top area of the timeline provides a big text area to write
+notes for the public (i.e. for the user followers). As this is
+the second most important activity on the Fediverse, this is
+located in the most prominent area of the user page. You can
+enter plain text, @user@host mentions and other things. See the
+.Xr snac 5
+manual for more information on the allowed markup.
+.Pp
+Other fields immediately below the big text one allow some control
+about the post to be sent:
+.Bl -tag -offset indent
+.It Sensitive content
+If you set this checkbox, your post will be marked with a
+content warning. The immediately following, optional text box
+allows you to write a description about why your content is
+so sensitive.
+.It Only for mentioned people
+If you set this checkbox, your text will not be public, but only
+sent to those people you mention in the post body.
+.It Reply to (URL)
+If you fill this optional text field with the URL of another one's
+post, your text will be considered as a reply to it, not a
+standalone one.
+.El
+.Pp
+More options are hidden under a toggle control. They are the
+following:
+.Bl -tag -offset indent
+.It Follow (by URL or user@host)
+Fill the input area with a user 'actor' URL or a user@host
+Fediverse identifier to follow.
+.It Boost (by URL)
+Fill the input area with the URL of a Fediverse note to be
+boosted.
+.It User setup...
+This option opens the user setup dialog.
+.El
+.Pp
+The user setup dialog allows some user information to be
+changed, specifically:
+.Bl -tag -offset indent
+.It User name
+Your user name, or not really that. People like to include
+emojis, flags and strange symbols for some reason.
+.It Avatar URL
+The URL of a picture to be used as your avatar in timelines
+around the world.
+.It Bio
+Enter here a bunch of self-indulgent blurb about yourself.
+The same markup options available for text notes apply here.
+.It Always show sensitive content
+By default,
+.Nm
+hides content marked as sensitive by their publishers.
+If you check this option, sensitive content is always shown.
+.It Email address for notifications
+If this field is not empty, an email message will be sent
+to this address whenever a post written by you is liked,
+boosted or replied to.
+.It Telegram notifications
+To enable notifications via Telegram, fill the two provided
+fields (Bot API key and Chat id). You need to create both
+a Telegram channel and a bot for this; the process is rather
+cumbersome but it's documented everywhere. The Bot API key
+is a long string of alphanumeric characters and the chat id
+is a big, negative number.
+.It ntfy notifications
+To enable notifications via ntfy (both self-hosted or
+standard ntfy.sh server), fill the two provided
+fields (ntfy server/topic and, if protected, the token).
+You need to refer to the https://ntfy.sh web site for
+more information on this process.
+.It Maximum days to keep posts
+This numeric value specifies the number of days to pass before
+posts (yours and others') will be purged. This value overrides
+what the administrator defined in the global server settings
+only if it's lesser (i.e. you cannot keep posts for longer
+than what the admin desires). A value of 0 (the default) means
+that the global server settings will apply to the posts in your
+timeline.
+.It Drop direct messages from people you don't follow
+Just what it says in the tin. This is to mitigate spammers
+coming from Fediverse instances with lax / open registration
+processes. Please take note that this also avoids possibly
+legitimate people trying to contact you.
+.It Password
+Write the same string in these two fields to change your
+password. Don't write anything if you don't want to do this.
+.El
+.Pp
+The rest of the page contains your timeline in reverse
+chronological order (i.e., newest interactions first).
+.Nm
+shows the conversations as nested trees, unlike other Fediverse
+software; every time you contribute something to a conversation,
+the full thread is bumped up, so new interactions are shown
+always at the top of the page while the forgotten ones languish
+at the bottom.
+.Pp
+Private notes (a.k.a. direct messages) are also shown in
+the timeline as normal messages, but marked with a cute lock
+to mark them as non-public. Replies to direct messages are
+also private and cannot be liked nor boosted.
+.Pp
+For each entry in the timeline, a set of reasonable actions
+in the form of buttons will be shown. These can be:
+.Bl -tag -offset indent
+.It Reply
+Unveils a text area to write your intelligent and acute comment
+to an uninformed fellow. This note is sent to the original
+author as well as to your followers. The note can include
+mentions in the @user@format; these people will also become
+recipients of the message. If you reply to a boost or like,
+you are really replying to the note, not to the admirer of it.
+.It Like
+Click this if you admire this post. The poster and your
+followers will be informed.
+.It Boost
+Click this if you want to propagate this post to all your
+followers. The original author will also be informed.
+.It Bookmark
+Click this to bookmark a post.
+.It Follow
+Click here if you want to start receiving all the shenanigans
+the original author of the post will write in the future.
+.It Unfollow
+Click here if you are fed up of this fellow's activities.
+.It Delete
+Click here to send this post to the bin. If it's an activity
+written by you, the appropriate message is sent to the rest
+of involved parts telling them that you no longer want your
+thing in their servers (not all implementations really obey
+this kind of requirements, though).
+.It MUTE
+This is the most important button in
+.Nm
+and the Fediverse in general. Click it if you don't want
+to read crap from this user again in the foreseeable future.
+.It Hide
+If a conversation is getting long and annoying but not enough
+to MUTE its author forever, click this button to avoid seeing
+the post and its children anymore.
+.It Edit
+Posts written by you on 
+.Nm
+version 2.19 and later can be edited and resent to their
+recipients.
+.El
+.Ss Command-line options
+The command-line tool provide the following commands:
+.Bl -tag -offset indent
+.It Cm init Op basedir
+Initializes the data storage. This is an interactive command; necessary
+information will be prompted for. The
+.Ar basedir
+directory must not exist.
+.It Cm upgrade Ar basedir
+Upgrades the data storage after installing a new version.
+Only necessary if
+.Nm
+complains and demands it.
+.It Cm httpd Ar basedir
+Starts the daemon.
+.It Cm purge Ar basedir
+Purges old data from the timeline of all users.
+.It Cm adduser Ar basedir Op uid
+Adds a new user to the server. This is an interactive command;
+necessary information will be prompted for.
+.It Cm resetpwd Ar basedir Ar uid
+Resets a user's password to a new, random one.
+.It Cm queue Ar basedir Ar uid
+Processes the output queue of the specified user, sending all
+enqueued messages and re-enqueing the failing ones. This command
+must not be executed if the server is running.
+.It Cm follow Ar basedir Ar uid Ar actor
+Sends a Follow message for the specified actor URL.
+.It Cm request Ar basedir Ar uid Ar url
+Requests an object and dumps it to stdout. This is a very low
+level command that is not very useful to you.
+.It Cm announce Ar basedir Ar uid Ar url
+Announces (boosts) a post via its URL.
+.It Cm note Ar basedir Ar uid Ar text Op file file ...
+Enqueues a Create + Note message to all followers. If the
+.Ar text
+argument is -e, the external editor defined by the EDITOR
+environment variable will be invoked to prepare a message; if
+it's - (a lonely hyphen), the post content will be read from stdin.
+The rest of command line arguments are treated as media files to be
+attached to the post.
+.It Cm block Ar basedir Ar instance_url
+Blocks a full instance, given its URL or domain name. All subsequent
+incoming activities with identifiers from that instance will be immediately
+blocked without further inspection.
+.It Cm unblock Ar basedir Ar instance_url
+Unblocks a previously blocked instance.
+.It Cm verify_links Ar basedir Ar uid
+Verifies all links stored as metadata for the given user. This verification
+is done by downloading the link content and searching for a link back to
+the
+.Nm
+user url that also contains a rel="me" attribute. These links are specially
+marked as verified in the user's public timeline and also via the Mastodon API.
+.It Cm export_csv Ar basedir Ar uid
+Exports some account data as Mastodon-compatible CSV files. After executing
+this command, the following files will be written to the current directory:
+.Pa bookmarks.csv ,
+.Pa blocked_accounts.csv ,
+.Pa lists.csv , and
+.Pa following_accounts.csv .
+.It Cm alias Ar basedir Ar uid Ar "@account@remotehost"
+Sets an account as an alias of this one. This is a necessary step to migrate
+an account to a remote Mastodon instance (see
+.Xr snac 8 ,
+section 'Migrating from snac to Mastodon').
+.It Cm migrate Ar basedir Ar uid
+Starts a migration from this account to the one set as an alias (see
+.Xr snac 8 ,
+section 'Migrating from snac to Mastodon').
+.It Cm state Ar basedir
+Dumps the current state of the server and its threads. For example:
+.Bd -literal -offset indent
+server: comam.es (snac/2.45-dev)
+uptime: 0:03:09:52
+job fifo size (cur): 45
+job fifo size (peak): 1532
+thread #0 state: input
+thread #1 state: input
+thread #2 state: waiting
+thread #3 state: waiting
+thread #4 state: output
+thread #5 state: output
+thread #6 state: output
+thread #7 state: waiting
+.Ed
+.Pp
+The job fifo size values show the current and peak sizes of the
+in-memory job queue. The thread state can be: waiting (idle waiting
+for a job to be assigned), input or output (processing I/O packets)
+or stopped (not running, only to be seen while starting or stopping
+the server).
+.El
+.Ss Migrating an account to/from Mastodon
+See 
+.Xr snac 8
+for details.
+.Ss Using Mastodon-compatible apps
+Since version 2.27,
+.Nm
+includes support for the Mastodon API, so you can use Mastodon-compatible
+mobile and desktop applications to access your account. Given a correctly
+configured server, the usage of these programs should be straightforward.
+Please take note that they will show your timeline in a 'Mastodon fashion'
+(i.e., as a plain list of posts), so you will lose the fancy, nested thread
+post display with the most active threads at the top that the web interface of
+.Nm
+provides.
+.Ss Implementing post bots
+.Nm
+makes very easy to post messages in a non-interactive manner. This example
+posts a string:
+.Bd -literal -offset indent
+uptime | snac note $SNAC_BASEDIR $SNAC_USER -
+.Ed
+.Pp
+You can setup a line like this from a
+.Xr crontab 5
+or similar. Take note that you need a) command-line access to the same machine
+that hosts the
+.Nm
+instance, and b) write permissions to the storage directories and files.
+.Pp
+You can also post non-interactively using the Mastodon API and a command-line
+http tool like
+.Xr curl 1
+or similar. This has the advantage that you can do it remotely from any host,
+anywhere; the only thing you need is an API Token. This is an example:
+.Bd -literal -offset indent
+curl -X POST https://$SNAC_HOST/api/v1/statuses \\
+--header "Authorization: Bearer ${TOKEN}" -d "status=$(uptime)"
+.Ed
+.Pp
+You can obtain an API Token by connecting to the following URL:
+.Bd -literal -offset indent
+https://$SNAC_HOST/oauth/x-snac-get-token
+.Ed
+.Pp
+.Sh ENVIRONMENT
+.Bl -tag -width Ds
+.It Ev DEBUG
+Overrides the debugging level from the server 'dbglevel' configuration
+variable. Set it to an integer value. The higher, the deeper in meaningless
+verbiage you'll find yourself into.
+.It Ev EDITOR
+The user-preferred interactive text editor to prepare messages.
+.El
+.Sh SEE ALSO
+.Xr snac 5 ,
+.Xr snac 8
+.Sh AUTHORS
+.An grunfink Lk https://comam.es/snac/grunfink @grunfink@comam.es
+.Sh LICENSE
+See the LICENSE file for details.
+.Sh CAVEATS
+Use the Fediverse sparingly. Don't fear the MUTE button.
+.Sh BUGS
+Probably plenty. Some issues may be even documented in the TODO.md file.
